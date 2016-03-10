@@ -4,12 +4,18 @@ const core = require('./core')
 
 const failwith = core.failwith
 
+let optionf = undefined
+
 function Some(val) {
   this.get = () => val
 }
 
 Some.prototype.isSome = () => true
 Some.prototype.isNone = () => false
+
+Some.prototype.map = function(mapping) {
+  return optionf.map(mapping)(this)
+}
 
 function None() { }
 
@@ -20,9 +26,11 @@ None.prototype.get = () => failwith(
   'Cannot call get() from None value.'
 )
 
+None.prototype.map = function() { return this }
+
 const none = new None()
 
-let optionf = val => {
+optionf = val => {
   return val === undefined ? none : new Some(val)
 }
 
