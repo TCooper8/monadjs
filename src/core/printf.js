@@ -95,6 +95,11 @@ function StringFormat (format) {
     }
   }
 
+  // Add the rest of the format string to the formatter.
+  ruleAcc.push(() => {
+    return acc
+  })
+
   return genFormatFn(ruleAcc, ++argIndex)
 }
 
