@@ -32,6 +32,9 @@ exports.typecheck = thing => {
       return typeof o === 'object'
     }
   }
+  else if (thing === Function) {
+    return o => typeof o === 'function'
+  }
   else if (thing === undefined) {
     return o => o === undefined
   }
