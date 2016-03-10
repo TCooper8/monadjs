@@ -1,6 +1,7 @@
 'use strict'
 
 const Option = require('./option')
+const Core = require('./core')
 
 const IArray = [].constructor
 function Array() {
@@ -62,6 +63,10 @@ Array.findIndex = predicate => array => {
 }
 
 Array.fold = folder => state => array => {
+  if (!Array.isArray(array)) {
+    throw new Error('Expected array')
+  }
+
   var i = -1
   var length = array.length
   var acc = state
@@ -81,6 +86,10 @@ Array.isArray = o => {
 }
 
 Array.map = mapping => array => {
+  if (!Array.isArray(array)) {
+    throw new Error('Expected array')
+  }
+
   var i = -1
   var length = array.length
   var acc = new array.constructor(length)
