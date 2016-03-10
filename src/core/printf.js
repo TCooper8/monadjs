@@ -90,41 +90,6 @@ function StringFormat (format) {
 
       ruleAcc.push(genArgRuleFromFormat('%' + c, ++argIndex))
     }
-    else if (c === '$') {
-      // Start of a sequence, add the acc to the rule.
-      let seq = '' + acc
-      acc = ''
-
-      ruleAcc.push(() => {
-        console.log('filling with %s', seq)
-        return seq
-      })
-
-      // Start of an evaluate variable format.
-      let ident = format[++i]
-      if (ident === undefined) {
-        throw new Error(util.format(
-          'InvalidFormat: Expected identifier after $:%s',
-          i - 1
-        ))
-      }
-      // Run until a space is hit.
-      while (i < format.length && !isWhitespace(c)) {
-        c = format[++i]
-        if (c === undefined) {
-          break
-        }
-
-        ident += c
-      }
-
-      // Now that we have the identifer, we need to make a rule to look it up.
-      let rule = () => {
-        let value = eval(ident)
-        return value
-      }
-      ruleAcc.push(rule)
-    }
     else {
       acc += c
     }
