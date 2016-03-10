@@ -13,8 +13,36 @@ function Some(val) {
 Some.prototype.isSome = () => true
 Some.prototype.isNone = () => false
 
+Some.prototype.filter = function(predicate) {
+  return optionf.filter(predicate)(this)
+}
+
+Some.prototype.flatMap = function(mapping) {
+  return optionf.flatMap(mapping)(this)
+}
+
+Some.prototype.each = function(action) {
+  return optionf.each(action)(this)
+}
+
+Some.prototype.getOrElse = function() {
+  return this.get()
+}
+
+Some.prototype.isEmpty = () => {
+  return false
+}
+
 Some.prototype.map = function(mapping) {
   return optionf.map(mapping)(this)
+}
+
+Some.prototype.orElse = function() {
+  return this
+}
+
+Some.prototype.toArray = function() {
+  return [ this.get() ]
 }
 
 function None() { }
@@ -22,11 +50,39 @@ function None() { }
 None.prototype.isSome = () => false
 None.prototype.isNone = () => true
 
+None.prototype.filter = () => {
+  return false
+}
+
+None.prototype.flatMap = () => {
+  return option.none
+}
+
+None.prototype.each = () => {}
+
 None.prototype.get = () => failwith(
   'Cannot call get() from None value.'
 )
 
-None.prototype.map = function() { return this }
+None.prototype.getOrElse = defaultValue => {
+  return defaultValue
+}
+
+None.prototype.isEmpty = () => {
+  return true
+}
+
+None.prototype.map = () => {
+  return option.none
+}
+
+None.prototype.orElse = defaultValue => {
+  return option(defaultValue)
+}
+
+None.prototype.toArray = () => {
+  return []
+}
 
 const none = new None()
 
