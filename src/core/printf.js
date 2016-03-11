@@ -5,6 +5,7 @@ const util = require('util')
 const fboolTok = '%b'
 const fstrTok = '%s'
 const fintTok = '%i'
+const fintHexTok = '%x'
 const fnumTok = '%d'
 const fobjTok = '%j'
 
@@ -23,6 +24,12 @@ let genArgRuleFromFormat = (tok, ruleIndex) => {
       let arg = args[ruleIndex]
       return parseInt(arg).toString()
     }
+  case fintHexTok:
+    return args => {
+      let arg = args[ruleIndex]
+      console.log('printing hex value', arg.toString(16))
+      return '0x' + parseInt(arg).toString(16)
+    }
 
   case fobjTok:
     return args => {
@@ -35,6 +42,9 @@ let genArgRuleFromFormat = (tok, ruleIndex) => {
   case fnumTok:
     return args => {
       let arg = args[ruleIndex]
+      if (arg === undefined) {
+        return undefined
+      }
       return arg.toString()
     }
 
