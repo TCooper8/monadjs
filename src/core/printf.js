@@ -131,6 +131,11 @@ exports.failwithf = formatf(msg => {
   throw new Error(msg)
 })
 
+exports.failwith = function() {
+  let err = Error.apply(this, arguments)
+  throw err
+}
+
 exports.printfn = formatf(console.log)
 
 exports.sprintf = formatf(msg => msg)
