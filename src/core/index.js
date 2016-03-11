@@ -12,6 +12,10 @@ exports.number = function() { return Number.apply(this, arguments) }
 exports.object = function() { return Object.apply(this, arguments) }
 
 exports.typecheck = thing => {
+  if (thing.prototype.parent !== undefined) {
+    thing = thing.prototype.parent
+  }
+
   if (thing === String) {
     return o => {
       return typeof o === 'string'
