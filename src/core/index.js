@@ -93,6 +93,9 @@ let typecheck = thing => {
   else if (thing === Float64Array) {
     return o => o instanceof Float64Array
   }
+  else {
+    return o => !!o && (o instanceof thing || o.constructor === thing)
+  }
 
   Printf.failwithf(
     'Unmapped type check for %s'
