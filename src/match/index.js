@@ -1,5 +1,6 @@
 'use strict'
 
+const Array = require('../array')
 const Option = require('../option')
 const Core = require('../core')
 
