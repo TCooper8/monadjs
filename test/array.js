@@ -4,6 +4,12 @@ const Array = require('../src/array')
 const assert = require('assert')
 
 describe('Testing array methods.', () => {
+  it('Should test type correctly', () => {
+    assert(Array.isArray([]))
+    assert(Array.isArray(new Array()))
+    assert(Array.isArray(Array()))
+  })
+
   it('Should filter the array propertly', () => {
     let a = [1, 1, 2, 2]
     assert.deepEqual(
