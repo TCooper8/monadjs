@@ -18,24 +18,25 @@ let timefn = f => n => {
 
 let testLogFormat = () => {
   let f = () => {
-    let format = '%s %s %x %j %j %j'
-    let args = [ 'hi', 5, 117, { id: 8 }, { name: 'bob' }, { log: 5 } ]
+    let format = '%s %i %x %j %j %j'
 
-    let f = Printf.sprintf(format)
-    let gArgs = [ format ].concat(args)
+    let f = util.format
+    let g = Printf.sprintf(format)
 
-    let n = 1000000
+    let n = 100000
 
-    console.log(util.format.apply(null, gArgs))
-    Printf.printfn(format).apply(null, args)
+    console.log(f(format, 'hi', 5, 117, { id: 8 }, { name: 'bob' }, { log: 5 }))
+    console.log(g('hi', 'hello', 117, { id: 8 }, { name: 'bob' }, { log: 5 }))
 
-    console.log('console')
-    timefn(() => util.format.apply(null, gArgs))(n)
+
+    console.log('util.format')
+    timefn(() => util.format(format, 'hi', 5, 117, { id: 8 }, { name: 'bob' }, { log: 5 }))(n)
+
     console.log('printf')
-    timefn(() => f.apply(null, args))(n)
+    timefn(() => g('hi', 'hello', 117, { id: 8 }, { name: 'bob' }, { log: 5 }))(n)
   }
 
   f()
 }
 
-timefn(testLogFormat)(10)
+timefn(testLogFormat)(1)

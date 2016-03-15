@@ -5,44 +5,52 @@ const Monad = require('../src/index')
 const _ = require('lodash')
 const assert = require('assert')
 
-let timefn = f => n => {
-  let ti = new Date()
-  var i = -1
-  while (++i < n) {
-    f()
-  }
+let timef = f => {
+  var ti = new Date()
+  f()
+  var tf = new Date()
 
-  let tf = new Date()
-  let dt = (tf - ti) / 1000.0
+  return (tf - ti) / 1000.0
+}
 
-  console.log('%s in %ss', n, dt)
+let timefAvg = f => n => {
+  let add = (a, b) => a + b
+
+  let sum = Monad
+    .fold(Array)
+    (add)
+    (0)
+    (Monad.map(Array)(() => timef(f))(_.range(n)))
+
+  return sum
 }
 
 let testFilter = () => {
 
   let f = () => {
-    let length = 100000
-    let ls = new Int32Array(length)
+    let length = 5000000
+    let ls = new Array(length)
     let limit = length / 2
 
-    let filter = i => i > 1
+    let filter = i => i < limit
 
     _.each(_.range(length), i => ls[i] = i)
 
-    let f = Array.filter(filter)
-    let n = 10
+    let n = 100
 
-    assert.deepEqual(f(ls), _.filter(ls, filter))
+    let f = () => _.filter(ls, filter)
 
-    console.log('\nlodash:')
-    timefn(() => _.filter(ls, filter))(n)
-    console.log('\nmonadjs:')
-    timefn(() => f(ls))(n)
+    let _g = Monad.Array.filter(filter)
+    let g = () => _g(ls, limit)
+    //let g = () => Monad.Array.filter(filter)(ls, 0)
+
+    assert.deepEqual(f(), g())
+
+    printfn('lodash = %s')(timefAvg(f)(n))
+    printfn('monadjs = %s')(timefAvg(g)(n))
   }
 
-  console.log('Testing filter')
-  timefn(f)(2)
-  console.log('')
+  timefAvg(f)(1)
 }
 
 let testFind = () => {
@@ -73,6 +81,7 @@ let testFold = () => {
   let f = () => {
     let length = 1000000
     let ls = _.range(length)
+    //let ls = 'hello world!'
 
     let state = 1337
     let folderf = acc => i => acc + i
@@ -98,4 +107,4 @@ let testFold = () => {
   console.log('')
 }
 
-testFold()
+testFilter()
