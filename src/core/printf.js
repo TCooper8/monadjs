@@ -1,5 +1,6 @@
 'use strict'
 
+const Core = require('../core')
 const util = require('util')
 
 const fboolTok = '%b'
@@ -17,24 +18,31 @@ let isWhitespace = char => {
     || char === '\r'
 }
 
-let genArgRuleFromFormat = (tok, ruleIndex) => {
+let genArgRuleFromFormat = (tok, ruleIndex, tokIndex, formatArgs) => {
+  formatArgs || (formatArgs = [])
+
   switch (tok) {
   case fintTok:
     return args => {
       let arg = args[ruleIndex]
+
       return parseInt(arg).toString()
     }
   case fintHexTok:
     return args => {
       let arg = args[ruleIndex]
-      console.log('printing hex value', arg.toString(16))
       return '0x' + parseInt(arg).toString(16)
     }
 
   case fobjTok:
     return args => {
       let obj = args[ruleIndex]
-      return JSON.stringify(obj).replace(/\"/g, ' ')
+      let res = JSON.stringify(obj, formatArgs[0], formatArgs[1])
+
+      if (!res) {
+        return 'undefined'
+      }
+      return res.replace(/\"/g, ' ').replace(/ ,/g, ',')
     }
 
   case fboolTok:
@@ -88,17 +96,60 @@ function StringFormat (format) {
         return seq
       })
 
-      // Start of a format token.
-      // This will increment the argIndex.
-      c = format[++i]
-      if (c === undefined) {
-        throw new Error(util.format(
-          'InvalidFormat: Expected format token after %:%s',
-          i - 1
+      // Check if this is a %{ ... } format rule.
+      c = format[i + 1]
+
+      if (c === '{') {
+        // This is a ${ ... } format rule.
+        // Parse the string until '}' is hit.
+
+        let formatSeq = ''
+        c = format[++i]
+        while (true) {
+          c = format[++i]
+
+          if (c === undefined) {
+            throw new Error(
+              'InvalidFormat: Expected \"}\" character to escape formatting sequence.'
+            )
+          }
+          else if (c === '}') {
+            break
+          }
+
+          // Add the character to the sequence.
+          formatSeq += c
+        }
+
+        // Split the arguments by comma.
+        let args = formatSeq.split(',')
+        let formatTok = '%' + args[0].trim()
+        let formatArgs = new Array(args.length - 1)
+
+        for (let i = 1; i < args.length; i++) {
+          formatArgs[i - 1] = JSON.parse(args[i].trim())
+        }
+
+        ruleAcc.push(genArgRuleFromFormat(
+          formatTok,
+          ++argIndex,
+          i - 1,
+          formatArgs
         ))
       }
+      else {
+        // Start of a format token.
+        // This will increment the argIndex.
+        c = format[++i]
+        if (c === undefined) {
+          throw new Error(util.format(
+            'InvalidFormat: Expected format token after %:%s',
+            i - 1
+          ))
+        }
 
-      ruleAcc.push(genArgRuleFromFormat('%' + c, ++argIndex))
+        ruleAcc.push(genArgRuleFromFormat('%' + c, ++argIndex, i - 1))
+      }
     }
     else {
       acc += c
