@@ -9,6 +9,7 @@ const fintTok = '%i'
 const fintHexTok = '%x'
 const fnumTok = '%d'
 const fobjTok = '%j'
+const fanyTok = '%A'
 
 let isWhitespace = char => {
   return false
@@ -54,6 +55,41 @@ let genArgRuleFromFormat = (tok, ruleIndex, tokIndex, formatArgs) => {
         return undefined
       }
       return arg.toString()
+    }
+
+  case fanyTok:
+    return args => {
+      let arg = args[ruleIndex]
+      if (arg === undefined) {
+        return 'undefined'
+      }
+      else if (arg === null) {
+        return 'null'
+      }
+      else if (Core.isNumber(arg)) {
+        return parseInt(arg).toString()
+      }
+      else if (Core.isString(arg)) {
+        return arg
+      }
+      else if (Core.isObject(arg)) {
+        return
+      }
+      else if (Core.isError(arg)) {
+        return arg.message
+      }
+      else if (Core.isFunction(arg)) {
+        return arg
+      }
+      else if (Core.isBuffer(arg)) {
+        return '[ Buffer ]'
+      }
+      else if (Core.isObject(arg)) {
+        return JSON.stringify(arg, formatArgs[0], formatArgs[1]).replace(/\"/g, ' ').replace(/ ,/g, ',')
+      }
+      else {
+        return arg.toString()
+      }
     }
 
   default:
