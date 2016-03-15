@@ -11,30 +11,36 @@ exports.int = parseInt
 exports.number = function() { return Number.apply(this, arguments) }
 exports.object = function() { return Object.apply(this, arguments) }
 
-exports.typecheck = thing => {
-  if (thing.prototype.parent !== undefined) {
+let typecheck = thing => {
+  //console.log('typecheck for %s', thing)
+  if (!!thing && !!thing.prototype && thing.prototype.parent !== undefined) {
+    //console.log('typecheck has parent %s', thing.prototype.parent)
     thing = thing.prototype.parent
   }
 
-  if (thing === String) {
-    return o => {
-      return typeof o === 'string'
-    }
-  }
-  else if (thing === Number) {
-    return o => {
-      return typeof o === 'number'
-    }
+  if (thing === Array) {
+    return o => Array.isArray(o)
   }
   else if (thing === Boolean) {
-    return o => {
-      return typeof o === 'boolean'
-    }
+    return o => typeof o === 'boolean'
+  }
+  else if (thing === Buffer) {
+    return Buffer.isBuffer
+  }
+  else if (thing === String) {
+    return o => typeof o === 'string'
+  }
+  else if (thing === Number) {
+    return o => typeof o === 'number'
+  }
+  else if (thing === Date) {
+    return o => !!o && o.constructor === Date
+  }
+  else if (thing === Error) {
+    return o => !!o && o.constructor === Error
   }
   else if (thing === Object) {
-    return o => {
-      return typeof o === 'object'
-    }
+    return o => !!o && o.constructor === Object
   }
   else if (thing === Function) {
     return o => typeof o === 'function'
@@ -45,8 +51,8 @@ exports.typecheck = thing => {
   else if (thing === null) {
     return o => o === null
   }
-  else if (thing === Array) {
-    return o => Array.isArray(o)
+  else if (thing === RegExp) {
+    return o => !!o && o.constructor === RegExp
   }
   else if (thing === Set) {
     return o => o instanceof Set
@@ -92,6 +98,30 @@ exports.typecheck = thing => {
     'Unmapped type check for %s'
   )(thing)
 }
+
+exports.isArray = typecheck(Array)
+
+exports.isBoolean = typecheck(Boolean)
+
+exports.isString = typecheck(String)
+
+exports.isBuffer = typecheck(Buffer)
+
+exports.isDate = typecheck(Date)
+
+exports.isError = typecheck(Error)
+
+exports.isFunction = typecheck(Function)
+
+exports.isNull = typecheck(null)
+
+exports.isNumber = typecheck(Number)
+
+exports.isObject = typecheck(Object)
+
+exports.isPlainObject = typecheck
+
+exports.typecheck = typecheck
 
 exports.pipe = pipe
 
