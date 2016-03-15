@@ -113,14 +113,14 @@ let check = (typeKey, unions) => {
 
       if (key === typeKey || unions.find(k => k === key)) {
         _.map(Array)(val => {
-          it(sprintf('Should typecheck true for %s from %j')(typeKey, val), () => {
-            assert(typecheck(type)(val), sprintf('Type %s should have been true for %j')(typeKey, val))
+          it(sprintf('Should typecheck true for %s from %A')(typeKey, val), () => {
+            assert(typecheck(type)(val), sprintf('Type %s should have been true for %A')(typeKey, val))
           })
         })(values)
       }
       else {
         _.map(Array)(val => {
-          it(sprintf('Should typecheck false for %s from %j')(typeKey, val), () => {
+          it(sprintf('Should typecheck false for %s from %A')(typeKey, val), () => {
             assert(typecheck(type)(val) === false)
           })
         })(values)
@@ -146,3 +146,20 @@ check('String')
 check('undefined')
 check('WeakMap')
 check('WeakSet')
+
+describe('Testing custom type checking.', () => {
+  it('Should typecheck true for this custom type, and false for all others', () => {
+    function F() { }
+
+    primitives['F'] = [
+      new F()
+    ]
+    primitives['NotF'] = [
+      new (function F() { })
+    ]
+
+    typeFns['F'] = F
+
+    check('F')
+  })
+})
