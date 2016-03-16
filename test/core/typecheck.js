@@ -129,37 +129,80 @@ let check = (typeKey, unions) => {
   })
 }
 
-check('Array', [ '_Array' ])
-check('_Array', [ 'Array' ])
-check('Boolean')
-check('Buffer')
-check('Date')
-check('Error')
-check('Function')
-check('Map')
-check('null')
-check('Number')
-check('Object')
-check('RegExp')
-check('Set')
-check('String')
-check('undefined')
-check('WeakMap')
-check('WeakSet')
+//check('Array', [ '_Array' ])
+//check('_Array', [ 'Array' ])
+//check('Boolean')
+//check('Buffer')
+//check('Date')
+//check('Error')
+//check('Function')
+//check('Map')
+//check('null')
+//check('Number')
+//check('Object')
+//check('RegExp')
+//check('Set')
+//check('String')
+//check('undefined')
+//check('WeakMap')
+//check('WeakSet')
+//
+//describe('Testing custom type checking.', () => {
+//  it('Should typecheck true for this custom type, and false for all others', () => {
+//    function F() { }
+//
+//    primitives['F'] = [
+//      new F()
+//    ]
+//    primitives['NotF'] = [
+//      new (function F() { })
+//    ]
+//
+//    typeFns['F'] = F
+//
+//    check('F')
+//  })
+//})
 
-describe('Testing custom type checking.', () => {
-  it('Should typecheck true for this custom type, and false for all others', () => {
-    function F() { }
+describe('Testing union type checking.', () => {
+  it('Should typecheck true for this union type.', () => {
+    let Tuple = Union(Number, String)
+    let NotTuple = Union(Number, String)
 
-    primitives['F'] = [
-      new F()
+    console.log('test')
+    let t0 = new Tuple(1, 'bob')
+    let t1 = new NotTuple(1, 'tim')
+
+    console.log('Is type =', t0.isType(t1))
+    console.log('Is type = ', typecheck(Tuple)(t0))
+    let unionCheck = typecheck(Union)
+    console.log('Is Union =', unionCheck(Tuple))
+
+    primitives['Tuple'] = [
+      new Tuple(1, 'bob')
     ]
-    primitives['NotF'] = [
-      new (function F() { })
+
+    primitives['NotTuple'] = [
+      new NotTuple(1, 'tim')
     ]
 
-    typeFns['F'] = F
+    typeFns['NotTuple'] = NotTuple
+    typeFns['Tuple'] = Tuple
 
-    check('F')
+    check('Tuple', [ 'NotTuple' ])
   })
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
