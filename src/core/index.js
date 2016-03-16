@@ -2,9 +2,76 @@
 
 const Printf = require('./printf')
 
+function Union () {
+  let types = Array.prototype.slice.call(arguments)
+  let checks = new Array(types.length)
+
+  for (let i = 0; i < types.length; i++) {
+    checks[i] = typecheck(types[i])
+  }
+
+  let isType = other => {
+    if (other === undefined || other === null) {
+      return false
+    }
+
+    if (!other.prototype || other.prototype.parent !== Union) {
+      return false
+    }
+
+    for (let i = 0; i < types.length; i++) {
+      let check = checks[i]
+      let val = other.get(i)
+
+      if (!check(other.get(i))) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  let NewType = function () {
+    let values = Array.prototype.slice.call(arguments)
+
+    for (let i = 0; i < values.length; i++) {
+      let value = values[i]
+      let check = checks[i]
+      if (!check(value)) {
+        Printf.failwithf('Cannot constructor Union, expected argument %s to be %A, but got %A')
+        (i, types[i], value)
+      }
+    }
+
+    this.get = i => values[i]
+
+    this.toString = () => {
+      return [
+        '(',
+        values.join(', '),
+        ')'
+      ].join('')
+    }
+
+    this.isType = isType
+
+    this.prototype = {}
+    this.prototype.parent = Union
+  }
+
+  NewType.prototype = { }
+  NewType.prototype.parent = Union
+
+  NewType.isType = isType
+
+  return NewType
+}
+
 let pipe = (f, g) => function() {
   return g(f.apply(this, arguments))
 }
+
+exports.Union = Union
 
 exports.bool = function() { return Boolean.apply(this, arguments) }
 exports.int = parseInt
@@ -13,13 +80,26 @@ exports.object = function() { return Object.apply(this, arguments) }
 
 let typecheck = thing => {
   //console.log('typecheck for %s', thing)
+  let origin = thing
+  let hasUnionParent = false
+
   if (!!thing && !!thing.prototype && thing.prototype.parent !== undefined) {
     //console.log('typecheck has parent %s', thing.prototype.parent)
     thing = thing.prototype.parent
+    if (thing === Union) {
+      hasUnionParent = true
+    }
   }
 
   if (thing === Array) {
     return o => Array.isArray(o)
+  }
+  else if (hasUnionParent) {
+    return origin.isType
+  }
+  else if (thing === Union) {
+    //console.log('Typecheck for union')
+    return o => !!o && !!o.prototype && o.prototype.parent === Union
   }
   else if (thing === Boolean) {
     return o => typeof o === 'boolean'
@@ -96,10 +176,6 @@ let typecheck = thing => {
   else {
     return o => !!o && (o instanceof thing || o.constructor === thing)
   }
-
-  Printf.failwithf(
-    'Unmapped type check for %s'
-  )(thing)
 }
 
 exports.isArray = typecheck(Array)
